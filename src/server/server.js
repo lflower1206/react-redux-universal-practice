@@ -1,27 +1,37 @@
 import Express from 'express';
 
 import React from 'react';
-import ReactDom from 'react-dom';
+import { renderToString } from 'react-dom/server';
 import { Provider } from 'react-redux';
+
+import configureStore from '../store/configureStore';
+
+import App from '../containers/App';
 
 const app = new Express();
 const PORT = 3000;
-const HTML = `
-                <!DOCTYPE html>
-                <html>
-                    <head>
-                        <title>Universal Redux Sample</title>
-                    </head>
-                    <body>
-                        <div id="app"></div>
-                        <script>
-                        </script>
-                    </body>
-                </html>
-            `;
 
 var handleRender = function(req, res) {
-    res.send(HTML);
+
+    const store = configureStore();
+    const appHTML = renderToString(
+        <Provider store={ store }>
+            <App />
+        </Provider>
+    );
+
+    res.send(`
+            <!DOCTYPE html>
+            <html>
+                <head>
+                    <title>Universal Redux Sample</title>
+                </head>
+                <body>
+                    <div id="app">${appHTML}</div>
+                    <script>
+                    </script>
+                </body>
+            </html>`);
 };
 
 app.get('/', handleRender);
